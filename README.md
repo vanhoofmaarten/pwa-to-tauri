@@ -12,12 +12,12 @@ npx @mrtnvh/pwa-to-tauri
 Enter the URL of the PWA you want to convert. The app will be created in `~/Applications/PWA Tauri Apps`
 
 ## Possible future improvements:
-[x] Support Mac
-[] Support Windows
-[] Support Linux
+- [x] Support Mac
+- [ ] Support Windows
+- [ ] Support Linux
 
-[x] Node CLI
-[] Rust CLI
+- [x] Node CLI
+- [ ] Rust CLI
 
-[] Adblock
-[] Audit security risks
+- [ ] Adblock
+- [ ] Audit security risks

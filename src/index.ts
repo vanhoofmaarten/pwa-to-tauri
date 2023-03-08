@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // @ts-ignore
 import homeOrTemp from "home-or-tmp";
 import { copy, ensureDir } from "fs-extra";

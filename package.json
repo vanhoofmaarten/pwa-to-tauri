@@ -1,6 +1,6 @@
 {
   "name": "@mrtnvh/pwa-to-tauri",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CLI tool to wrap PWAs in Tauri desktop apps",
   "main": "index.js",
   "bin": "./dist/index.mjs",

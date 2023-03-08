@@ -3,14 +3,14 @@
   "version": "0.2.0",
   "description": "CLI tool to wrap PWAs in Tauri desktop apps",
   "main": "index.js",
-  "bin": "./dist/index.js",
+  "bin": "./dist/index.mjs",
   "files": [
     "dist"
   ],
   "type": "module",
   "scripts": {
     "dev": "npm run build -- --watch",
-    "build": "rimraf dist && esbuild src/index.ts --bundle --outdir=dist --platform=node --target=node18 --format=esm --splitting --packages=external",
+    "build": "rimraf dist && esbuild src/index.ts --bundle --outfile=dist/index.mjs --platform=node --target=node18 --format=esm --packages=external",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

@@ -9,8 +9,8 @@
   ],
   "type": "module",
   "scripts": {
-    "dev": "rimraf /dist && tsc -w",
-    "build": "rimraf /dist && tsc",
+    "dev": "npm run build -- --watch",
+    "build": "rimraf dist && esbuild src/index.ts --bundle --outdir=dist --platform=node --target=node18 --format=esm --splitting --packages=external",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -41,6 +41,7 @@
     "@types/inquirer": "^9.0.3",
     "@types/lodash": "^4.14.191",
     "@types/lodash-es": "^4.17.6",
+    "esbuild": "^0.17.11",
     "rimraf": "^4.3.1",
     "tmp": "^0.2.1",
     "utility-types": "^3.10.0"

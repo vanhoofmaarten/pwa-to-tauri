@@ -1,4 +1,4 @@
-import { rimraf } from "rimraf";
+import * as rimraf from "rimraf";
 import https from "node:https";
 import { createWriteStream } from "node:fs";
 import { readJson, writeJson } from "fs-extra/esm";

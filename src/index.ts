@@ -4,7 +4,7 @@
 import homeOrTemp from "home-or-tmp";
 import { copy, ensureDir } from "fs-extra";
 import ora from "ora";
-import { rimraf } from "rimraf";
+import * as rimraf from "rimraf";
 import { dir, dirSync } from "tmp-promise";
 import { appNameQuery } from "./appNameQuery.js";
 import { checkRequirements } from "./checkRequirements.js";

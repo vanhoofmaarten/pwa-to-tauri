@@ -10,7 +10,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build -- --watch",
-    "build": "rimraf dist && esbuild src/index.ts --bundle --outfile=dist/index.mjs --platform=node --target=node18 --format=esm --packages=external",
+    "build": "del dist && esbuild src/index.ts --bundle --outfile=dist/index.mjs --platform=node --target=node18 --format=esm --packages=external",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -25,10 +25,13 @@
     "url": "https://github.com/vanhoofmaarten/pwa-to-tauri"
   },
   "dependencies": {
+    "commander": "^10.0.0",
+    "del": "^7.0.0",
     "execa": "^7.0.0",
     "fs-extra": "^11.1.0",
     "home-or-tmp": "^4.0.0",
     "inquirer": "^9.1.4",
+    "is-relative-url": "^4.0.0",
     "lodash-es": "^4.17.21",
     "node-html-parser": "^6.1.5",
     "ora": "^6.1.2",
@@ -41,8 +44,8 @@
     "@types/inquirer": "^9.0.3",
     "@types/lodash": "^4.14.191",
     "@types/lodash-es": "^4.17.6",
+    "del-cli": "^5.0.0",
     "esbuild": "^0.17.11",
-    "rimraf": "^4.3.1",
     "tmp": "^0.2.1",
     "utility-types": "^3.10.0"
   }

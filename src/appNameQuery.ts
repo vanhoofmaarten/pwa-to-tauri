@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const $appName = z.string();
 
-export const appNameQuery = ({ manifestAppName }: { manifestAppName: string }) =>
+export const appNameQuery = ({ manifestAppName }: { manifestAppName?: string }): Promise<{ appName: string }> =>
   inquirer.prompt(
     [
       {

@@ -47,14 +47,16 @@ export const fetchManifest = async (manifestUrl: string) => {
       "user-agent": userAgent,
     },
   });
+  // throw new Error(JSON.stringify(response.ok, null, 2));
   if (!response.ok) throw new Error(`Could not fetch ${manifestUrl}`);
   const manifest: WebManifest = await response.json();
   return manifest;
 };
 
-export const fetchWebManifest = async (pwaUrl: string) => {
+export const fetchWebManifestFromPwaUrl = async (pwaUrl?: string) => {
+  if (!pwaUrl) throw new Error("No PWA URL provided");
   const homePageHtml = await fetchPwaHomePageHtml(pwaUrl);
   const manifestUrl = await fetchWebManifestUrl(homePageHtml);
   const manifest = await fetchManifest(manifestUrl);
-  return manifest;
+  return { manifest, manifestUrl };
 };

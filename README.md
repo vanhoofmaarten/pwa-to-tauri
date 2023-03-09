@@ -21,3 +21,9 @@ Enter the URL of the PWA you want to convert. The app will be created in `~/Appl
 
 - [ ] Adblock
 - [ ] Audit security risks
+
+- [x] Single command with arguments
+  - [x] manifest-url
+  - [x] name
+  - [x] start-url
+  - [x] help

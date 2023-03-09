@@ -1,7 +1,6 @@
-import * as rimraf from "rimraf";
-import https from "node:https";
-import { createWriteStream } from "node:fs";
+// @ts-ignore
 import { readJson, writeJson } from "fs-extra/esm";
+import { deleteAsync } from "del";
 import { defaultsDeep, snakeCase } from "lodash-es";
 import { DeepPartial } from "utility-types";
 import { WebManifest } from "../../fetchWebManifest.js";
@@ -9,6 +8,9 @@ import { Config } from "./schema.js";
 import { execaCommand } from "execa";
 import { ensureDir } from "fs-extra";
 import { userAgent } from "../../userAgent.js";
+import isRelativeUrl from "is-relative-url";
+import { resolve } from "../../url.js";
+import { getFileExtension, saveRemoteFile } from "../../file.js";
 
 async function getTauriConfig(configPath: string): Promise<Config> {
   return readJson(configPath);
@@ -22,23 +24,6 @@ function getIdentifierFromTitle(title: string) {
   const baseIdentifier = "com.mrtnvh.pwatotauri.";
   const identifier = snakeCase(title).replaceAll("_", "");
   return baseIdentifier + identifier;
-}
-
-function saveRemoteFile(options: { url: string; path: string }): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const localFile = createWriteStream(options.path);
-    https.get(options.url, (response) => {
-      response.on("end", () => {
-        resolve();
-      });
-      response.on("error", reject);
-      response.pipe(localFile);
-    });
-  });
-}
-
-function getFileExtension(url: string) {
-  return url.split(".").pop()?.split(/\#|\?/)[0];
 }
 
 async function getIconsFromManifest(options: { manifest: WebManifest; iconPath: string }) {
@@ -59,9 +44,9 @@ async function getIconsFromManifest(options: { manifest: WebManifest; iconPath: 
   return fileNames.map((fileName) => fileName);
 }
 
-async function getFavicon(options: { pwaUrl: string; iconPath: string }) {
+async function getFavicon(options: { baseUrl: string; iconPath: string }) {
   const fileName = "icon.ico";
-  const faviconUrl = options.pwaUrl + "/favicon.ico";
+  const faviconUrl = options.baseUrl + "/favicon.ico";
   await saveRemoteFile({ url: faviconUrl, path: `${options.iconPath}/${fileName}` });
   return fileName;
 }
@@ -84,17 +69,40 @@ async function createIconsFromLargestManifestIcon(manifestIcons: string[], iconP
   await execaCommand(`npx -y @tauri-apps/cli icon ${iconPath}/${largestIconFilename}`, { cwd: iconPath });
 }
 
+export function getWindowUrl(options: { baseUrl?: string; startUrl?: string; manifestUrl: string }) {
+  if (!options.baseUrl && !options.startUrl && !options.manifestUrl) {
+    throw new Error("No baseUrl, startUrl or manifestUrl defined");
+  }
+
+  // Use the origin of the manifestUrl as the base URL
+  const manifestUrl = new URL(options.manifestUrl);
+  let baseUrl = manifestUrl.origin;
+
+  // If the baseUrl is defined, use it as the base URL
+  if (options.baseUrl) baseUrl = options.baseUrl;
+
+  // If the startUrl is not defined, return the baseUrl
+  if (!options.startUrl) return baseUrl;
+
+  if (baseUrl && isRelativeUrl(options.startUrl)) {
+    // If the startUrl is relative, resolve it against the baseUrl
+    return resolve(baseUrl, options.startUrl);
+  }
+
+  return options.startUrl;
+}
+
 // Action: Fetch icons from web app manifest.
 // 1. Add icons to `src-tauri/icons`
 // 1. Add icons to `src-tauri/tauri.conf.json`
 // 1. Update tauri.conf.json
 export async function updateTauriConf(options: {
   workDirPath: string;
-  pwaUrl: string;
+  url: string;
   title: string;
   manifest: WebManifest;
 }) {
-  await rimraf(`${options.workDirPath}/src-tauri/icons/*.*`);
+  await deleteAsync(`${options.workDirPath}/src-tauri/icons/*.*`, { force: true });
   const tauriConfJsonPath = `${options.workDirPath}/src-tauri/tauri.conf.json`;
   const tauriConfig = await getTauriConfig(tauriConfJsonPath);
   const identifier = getIdentifierFromTitle(options.title);
@@ -102,8 +110,6 @@ export async function updateTauriConf(options: {
   await ensureDir(iconPath);
   const manifestIcons = await getIconsFromManifest({ manifest: options.manifest, iconPath });
   await createIconsFromLargestManifestIcon(manifestIcons, iconPath);
-  // const favicon = await getFavicon({ pwaUrl: options.pwaUrl, iconPath });
-  // const icon = [/* ...manifestIcons, */ favicon].map((iconFilename) => `icons/${iconFilename}`);
 
   const newTauriConfig: DeepPartial<Config> = {
     build: {
@@ -117,12 +123,11 @@ export async function updateTauriConf(options: {
     tauri: {
       bundle: {
         identifier,
-        // icon,
       },
       windows: [
         {
           title: options.title,
-          url: options.pwaUrl,
+          url: options.url,
           maximized: true,
           resizable: true,
           titleBarStyle: "Transparent",
